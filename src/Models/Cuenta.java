@@ -1,10 +1,10 @@
 package Models;
 
 public class Cuenta<T> {
-    private T numeroCuenta;  // Número de cuenta genérico (String, Integer, etc.)
-    private String pin;      // PIN de 4 dígitos
-    private double saldo;    // Saldo en la cuenta
-    private T titular;       // Titular de la cuenta (String u otro objeto)
+    private T numeroCuenta;
+    private String pin;
+    private double saldo;
+    private T titular;
 
     public Cuenta(T numeroCuenta, String pin, double saldo, T titular) {
         this.numeroCuenta = numeroCuenta;
@@ -13,7 +13,7 @@ public class Cuenta<T> {
         this.titular = titular;
     }
 
-    // Getters y Setters
+
     public T getNumeroCuenta() {
         return numeroCuenta;
     }

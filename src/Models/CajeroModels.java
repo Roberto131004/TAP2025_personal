@@ -13,9 +13,9 @@ public class CajeroModels {
     }
 
     private void inicializarCuentas(){
-        cuentas.put("12345",  new Cuenta<>("12345", "1111", 5000, "Juan Perez"));
-        cuentas.put("13579",  new Cuenta<>("13579", "2222", 100000, "Xochilt"));
-        cuentas.put("10009",  new Cuenta<>("10009", "3333", 999999, "Leonardo"));
+        cuentas.put("12345",  new Cuenta<>("12345", "1111", 500000, "Juan Perez"));
+        cuentas.put("13579",  new Cuenta<>("13579", "2222", 100000, "Roberto Moreno"));
+        cuentas.put("10000",  new Cuenta<>("10009", "3333", 200000, "Alexander Alejos"));
     }
 
     public boolean autenticar(String numeroCuenta, String pin){
