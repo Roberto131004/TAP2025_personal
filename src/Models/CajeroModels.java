@@ -1,67 +1,88 @@
 package Models;
+
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class CajeroModels {
-    private Map<String, Cuenta<String>> cuentas;
-    private Cuenta<String> cuentaActual;
+    private Map<String, CuentaBancaria> cuentas;
+    private CuentaBancaria cuentaActual;
 
-    public CajeroModels(){
+    public CajeroModels() {
         cuentas = new HashMap<>();
         inicializarCuentas();
     }
 
-    private void inicializarCuentas(){
-        cuentas.put("12345",  new Cuenta<>("12345", "1111", 500000, "Juan Perez"));
-        cuentas.put("13579",  new Cuenta<>("13579", "2222", 100000, "Roberto Moreno"));
-        cuentas.put("10000",  new Cuenta<>("10009", "3333", 200000, "Alexander Alejos"));
+    // 🔹 Inicializar algunas cuentas de prueba usando el Builder
+    private void inicializarCuentas() {
+        CuentaBancaria cuenta1 = new CuentaBancaria.Builder()
+                .setNumeroCuenta("12345")
+                .setTitular("Juan Perez")
+                .setSaldo(500000)
+                .setTipoCuenta("Ahorros")
+                .build();
+
+        CuentaBancaria cuenta2 = new CuentaBancaria.Builder()
+                .setNumeroCuenta("13579")
+                .setTitular("Roberto Moreno")
+                .setSaldo(100000)
+                .setTipoCuenta("Corriente")
+                .build();
+
+        CuentaBancaria cuenta3 = new CuentaBancaria.Builder()
+                .setNumeroCuenta("10000")
+                .setTitular("Alexander Alejos")
+                .setSaldo(200000)
+                .setTipoCuenta("Crédito")
+                .setLimiteCredito(30000)
+                .build();
+
+        cuentas.put(cuenta1.getNumeroCuenta(), cuenta1);
+        cuentas.put(cuenta2.getNumeroCuenta(), cuenta2);
+        cuentas.put(cuenta3.getNumeroCuenta(), cuenta3);
     }
 
-    public boolean autenticar(String numeroCuenta, String pin){
-        Cuenta<String> cuenta = cuentas.get(numeroCuenta);
-        if (cuenta != null && cuenta.validarPin(pin)) {
+    /
+    public boolean autenticar(String numeroCuenta) {
+        CuentaBancaria cuenta = cuentas.get(numeroCuenta);
+        if (cuenta != null) {
             this.cuentaActual = cuenta;
             return true;
-
         }
         return false;
     }
 
-    public Cuenta<String> getCuentaActual(){
+    public CuentaBancaria getCuentaActual() {
         return this.cuentaActual;
     }
 
-    public double consultarSaldo(){
-        return this.cuentaActual != null ? cuentaActual.getSaldo():0;
+
+    public double consultarSaldo() {
+        return this.cuentaActual != null ? cuentaActual.getSaldo() : 0;
     }
 
-    public String consultarPIN(){
-        return this.cuentaActual != null ? cuentaActual.getPin() : null;
-    }
 
-    public boolean realizarRetiro(double cantidad){
+    public boolean realizarRetiro(double cantidad) {
         return cuentaActual != null && cuentaActual.retirar(cantidad);
     }
 
-    public boolean realizarDeposito(double cantidad){
+
+    public boolean realizarDeposito(double cantidad) {
         if (cuentaActual != null && cantidad > 0) {
             cuentaActual.depositar(cantidad);
             return true;
-
         }
         return false;
     }
 
 
-    public boolean transferir(String numeroCuentaDestino, double cantidad){
+    public boolean transferir(String numeroCuentaDestino, double cantidad) {
         if (cuentaActual == null || cantidad <= 0) return false;
 
-        Cuenta<String> destino = cuentas.get(numeroCuentaDestino);
+        CuentaBancaria destino = cuentas.get(numeroCuentaDestino);
         if (destino == null) return false; // no existe
         if (destino.getNumeroCuenta().equals(cuentaActual.getNumeroCuenta())) return false;
 
-        // Retira primero; si hay fondos, deposita en destino
+
         if (cuentaActual.retirar(cantidad)) {
             destino.depositar(cantidad);
             return true;
@@ -70,14 +91,7 @@ public class CajeroModels {
     }
 
 
-    public boolean cambiarPinActual(String pinActual, String nuevoPin){
-        if (cuentaActual == null) return false;
-        return cuentaActual.cambiarPin(pinActual, nuevoPin);
-    }
-
-    public boolean cuentaExistente(String numeroCuenta){
+    public boolean cuentaExistente(String numeroCuenta) {
         return cuentas.containsKey(numeroCuenta);
     }
-
-
 }

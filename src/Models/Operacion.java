@@ -3,8 +3,7 @@ package Models;
 
 
 public interface Operacion {
-
-    void ejecutar(Cuenta cuenta, double monto);
-
+    void ejecutar(CuentaBancaria cuenta, double monto);
 }
+
 

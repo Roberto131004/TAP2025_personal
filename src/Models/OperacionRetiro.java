@@ -1,15 +1,13 @@
 package Models;
 
-
-
 public class OperacionRetiro implements Operacion {
     @Override
-    public void ejecutar(Cuenta cuenta, double monto) {
-        if (monto > 0 && monto <= cuenta.getSaldo()) {
-            cuenta.retirar(monto);
-            System.out.println(" Retiro de $" + monto + " realizado con éxito.");
+    public void ejecutar(CuentaBancaria cuenta, double monto) {
+        if (monto > 0 && cuenta.retirar(monto)) {
+            System.out.println("Retiro exitoso de $" + monto);
         } else {
-            System.out.println("⚠ Fondos insuficientes o monto inválido.");
+            System.out.println("No se pudo realizar el retiro (fondos insuficientes o monto inválido).");
         }
     }
 }
+

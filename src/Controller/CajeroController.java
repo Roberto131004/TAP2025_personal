@@ -1,7 +1,7 @@
 package Controller;
 
 import Models.CajeroModels;
-import Models.Cuenta;
+import Models.CuentaBancaria;
 import Models.Operacion;
 import Models.OperacionRetiro;
 import Models.OperacionDeposito;
@@ -14,7 +14,7 @@ public class CajeroController {
     private boolean sistemaActivo;
     private Operacion operacion; // Estrategia actual
 
-    public CajeroController(CajeroModels model, CajeroView view){
+    public CajeroController(CajeroModels model, CajeroView view) {
         this.model = model;
         this.view = view;
         this.sistemaActivo = true;
@@ -28,32 +28,34 @@ public class CajeroController {
     // Ejecutar estrategia
     public void ejecutarOperacion(double monto) {
         if (operacion != null && model.getCuentaActual() != null) {
-            Cuenta cuenta = model.getCuentaActual();
+            CuentaBancaria cuenta = model.getCuentaActual();
             operacion.ejecutar(cuenta, monto);
         } else {
             view.mostrarMensaje("⚠️ No hay operación definida o cuenta activa.");
         }
     }
 
-    public void iniciarSistema(){
+    // Iniciar sistema principal
+    public void iniciarSistema() {
         view.mostrarBienvenida();
         while (sistemaActivo) {
             if (autenticarUsuario()) {
                 ejecutarMenuPrincipal();
             } else {
-                view.mostrarMensaje("Credenciales incorrectas ");
+                view.mostrarMensaje("Cuenta inválida. Intenta de nuevo.");
             }
         }
-        view.mostrarMensaje("Gracias por usar nuestro cajero ");
+        view.mostrarMensaje("Gracias por usar nuestro cajero.");
     }
 
-    private boolean autenticarUsuario(){
+    // Autenticación (solo con número de cuenta por ahora)
+    private boolean autenticarUsuario() {
         String numeroCuenta = view.solicitarNumeroCuenta();
-        String pin = view.solcitarPin();
-        return model.autenticar(numeroCuenta, pin);
+        return model.autenticar(numeroCuenta);
     }
 
-    private void ejecutarMenuPrincipal(){
+    // Menú principal
+    private void ejecutarMenuPrincipal() {
         boolean sessionActiva = true;
         while (sessionActiva) {
             view.mostrarMenuPrincipal(model.getCuentaActual().getTitular());
@@ -76,93 +78,55 @@ public class CajeroController {
                     ejecutarOperacion(deposito);
                     break;
 
-                case 4: // Transferencia (aún no la migramos a Strategy porque requiere 2 cuentas)
+                case 4: // Transferencia
                     this.realizarTransferencia();
                     break;
 
-                case 5: // Cambio de PIN
-                    this.realizarCambioPin();
-                    break;
-
-                case 6: // Ver PIN
-                    this.mostrarPin();
-                    break;
-
-                case 7: // Salir
+                case 5: // Salir
                     this.cerrarSistema();
                     sessionActiva = false;
                     sistemaActivo = false;
                     break;
 
                 default:
-                    view.mostrarMensaje("Opción inválida, intenta de nuevo");
+                    view.mostrarMensaje("Opción inválida, intenta de nuevo.");
             }
         }
     }
 
-    public void mostrarPin(){
-        String pin = model.consultarPIN();
-        if(pin != null){
-            view.mostrarMensaje("Tu PIN actual es: " + pin);
-        } else {
-            view.mostrarMensaje("No hay cuenta activa.");
-        }
-    }
-
-    // Transferencia todavía no la pasamos a Strategy (puede hacerse después)
-    public void realizarTransferencia(){
+    // Transferencia entre cuentas
+    public void realizarTransferencia() {
         String cuentaDestino = view.solicitarCuentaDestino();
 
         if (!model.cuentaExistente(cuentaDestino)) {
-            view.mostrarMensaje("La cuenta destino no existe");
+            view.mostrarMensaje("La cuenta destino no existe.");
             return;
         }
 
         String cuentaOrigen = model.getCuentaActual().getNumeroCuenta();
         if (cuentaOrigen.equals(cuentaDestino)) {
-            view.mostrarMensaje("No puedes transferir a la MISMA cuenta");
+            view.mostrarMensaje("No puedes transferir a la MISMA cuenta.");
             return;
         }
 
         double cantidad = view.solicitarCantidad("transferir");
         if (cantidad <= 0) {
-            view.mostrarMensaje("Error en la cantidad ");
+            view.mostrarMensaje("Error en la cantidad.");
             return;
         }
 
         boolean ok = model.transferir(cuentaDestino, cantidad);
         if (ok) {
-            view.mostrarMensaje("Transferencia exitosa de $" + cantidad + " a la cuenta " + cuentaDestino);
+            view.mostrarMensaje("✅ Transferencia exitosa de $" + cantidad + " a la cuenta " + cuentaDestino);
         } else {
-            view.mostrarMensaje("No se pudo completar la transferencia (fondos insuficientes o datos inválidos)");
+            view.mostrarMensaje("❌ No se pudo completar la transferencia (fondos insuficientes o datos inválidos).");
         }
     }
 
-    public void realizarCambioPin(){
-        String pinActual = view.solcitarPin();
-        String nuevo = view.solicitarNuevoPin();
-        String confirm = view.solicitarConfirmacionPin();
-
-        if (!nuevo.equals(confirm)) {
-            view.mostrarMensaje("El nuevo PIN y la confirmación no coinciden.");
-            return;
-        }
-
-        if (!nuevo.matches("\\d{4}")) {
-            view.mostrarMensaje("El PIN debe contener exactamente 4 dígitos.");
-            return;
-        }
-
-        boolean actualizado = model.cambiarPinActual(pinActual, nuevo);
-        if (actualizado) {
-            view.mostrarMensaje("PIN actualizado correctamente. Ahora puedes confirmar en 'Ver PIN'.");
-        } else {
-            view.mostrarMensaje("Error: PIN actual incorrecto o no se pudo actualizar.");
-        }
-    }
-
-    public void cerrarSistema(){
+    // Cerrar sistema
+    public void cerrarSistema() {
         view.cerrar();
     }
 }
+
 
